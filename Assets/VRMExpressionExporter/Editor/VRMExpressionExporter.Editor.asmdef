@@ -1,0 +1,23 @@
+{
+    "name": "VRMExpressionExporter.Editor",
+    "rootNamespace": "VRMExpressionExporter.Editor",
+    "references": [
+        "VRMExpressionExporter.Runtime",
+        "UniGLTF",
+        "VRM10",
+        "UniTask",
+        "UniGLTF.Editor",
+        "VRM10.Editor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

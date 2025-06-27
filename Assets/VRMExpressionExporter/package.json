@@ -1,0 +1,25 @@
+{
+  "name": "com.murasaqi.vrmexpressionexporter",
+  "version": "1.0.0",
+  "displayName": "VRM Expression Exporter",
+  "description": "A comprehensive Unity toolset for extracting, visualizing, and exporting VRM expression data. Supports preview capture, CSV/Excel export, and AnimationClip generation.",
+  "unity": "2022.3",
+  "unityRelease": "0f1",
+  "dependencies": {
+    "com.vrmc.vrm": "0.129.2",
+    "com.cysharp.unitask": "2.3.3"
+  },
+  "keywords": [
+    "vrm",
+    "expression",
+    "export",
+    "animation",
+    "vtuber",
+    "avatar"
+  ],
+  "author": {
+    "name": "murasaqi",
+    "email": "",
+    "url": "https://github.com/murasaqi"
+  }
+}
