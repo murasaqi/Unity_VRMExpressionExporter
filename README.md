@@ -4,6 +4,8 @@
 [![UniVRM](https://img.shields.io/badge/UniVRM-0.129.2%2B-green.svg)](https://github.com/vrm-c/UniVRM)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+[日本語版 README はこちら](README_ja.md)
+
 A comprehensive Unity toolset for extracting, visualizing, and exporting VRM expression data. This package provides powerful tools for VRM avatar developers and content creators to analyze and utilize expression configurations.
 
 ![VRM Expression Exporter Screenshot](Documentation~/images/tool-screenshot.png)

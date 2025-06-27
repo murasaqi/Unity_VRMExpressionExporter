@@ -4,6 +4,8 @@
 [![UniVRM](https://img.shields.io/badge/UniVRM-0.129.2%2B-green.svg)](https://github.com/vrm-c/UniVRM)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+[English README is here](README.md)
+
 VRMファイルから表情データを抽出、可視化、エクスポートするための包括的なUnityツールセットです。VRMアバター開発者やコンテンツクリエイターが表情設定を分析・活用するための強力なツールを提供します。
 
 ![VRM Expression Exporter Screenshot](Documentation~/images/tool-screenshot.png)
