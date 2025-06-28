@@ -51,9 +51,17 @@ VRMファイルから表情データを抽出、可視化、エクスポート�
 
 ### 依存関係
 
-以下のパッケージが自動的にインストールされます：
-- **UniVRM** (com.vrmc.vrm) 0.129.2以上
-- **UniTask** (com.cysharp.unitask) 2.3.3以上
+**必要なパッケージ:**
+- **UniVRM** (com.vrmc.vrm) 0.129.2以上 - 自動的にインストールされます
+- **UniTask** (com.cysharp.unitask) 2.3.3以上 - 別途インストールが必要です
+
+#### UniTaskのインストール
+
+UniTaskは本パッケージのインストール前後に手動でインストールする必要があります：
+
+1. Package Managerを開く
+2. **+** ボタン → "Add package from git URL..." をクリック
+3. 以下を入力: `https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask`
 
 ## 📖 使い方
 
