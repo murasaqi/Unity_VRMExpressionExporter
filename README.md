@@ -51,17 +51,9 @@ A comprehensive Unity toolset for extracting, visualizing, and exporting VRM exp
 
 ### Dependencies
 
-**Required packages:**
-- **UniVRM** (com.vrmc.vrm) 0.129.2+ - Will be installed automatically
-- **UniTask** (com.cysharp.unitask) 2.3.3+ - Must be installed separately
-
-#### Installing UniTask
-
-UniTask must be installed manually before or after installing this package:
-
-1. Open Package Manager
-2. Click **+** → "Add package from git URL..."
-3. Enter: `https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask`
+The following packages will be automatically installed:
+- **UniVRM** (com.vrmc.vrm) 0.129.2+
+- **UniTask** (com.cysharp.unitask) 2.3.3+
 
 ## 📖 Usage
 
