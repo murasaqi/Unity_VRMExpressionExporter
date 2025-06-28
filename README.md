@@ -34,7 +34,7 @@ A comprehensive Unity toolset for extracting, visualizing, and exporting VRM exp
 2. Click the **+** button → "Add package from git URL..."
 3. Enter:
    ```
-   https://github.com/murasaqi/Unity_VRMExpressionExporter.git?path=/com.murasaqi.vrmexpressionexporter#main
+   https://github.com/murasaqi/Unity_VRMExpressionExporter.git?path=/com.murasaqi.vrmexpressionexporter#master
    ```
 
 ### Option 2: Package Manager (Local)

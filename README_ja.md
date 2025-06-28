@@ -34,7 +34,7 @@ VRMファイルから表情データを抽出、可視化、エクスポート�
 2. **+** ボタンをクリック → "Add package from git URL..."
 3. 以下を入力:
    ```
-   https://github.com/murasaqi/Unity_VRMExpressionExporter.git?path=/com.murasaqi.vrmexpressionexporter#main
+   https://github.com/murasaqi/Unity_VRMExpressionExporter.git?path=/com.murasaqi.vrmexpressionexporter#master
    ```
 
 ### 方法2: Package Manager (ローカル)
