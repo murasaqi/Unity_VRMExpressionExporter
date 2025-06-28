@@ -1,8 +1,8 @@
 {
-    "name": "VRMExpressionExporter.Editor",
-    "rootNamespace": "VRMExpressionExporter.Editor",
+    "name": "Murasaqi.VRMExpressionExporter.Editor",
+    "rootNamespace": "Murasaqi.VRMExpressionExporter.Editor",
     "references": [
-        "VRMExpressionExporter.Runtime",
+        "Murasaqi.VRMExpressionExporter.Runtime",
         "UniGLTF",
         "VRM10",
         "UniTask",

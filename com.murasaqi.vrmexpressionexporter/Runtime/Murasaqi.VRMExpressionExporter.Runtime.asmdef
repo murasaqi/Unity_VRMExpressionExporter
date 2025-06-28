@@ -1,6 +1,6 @@
 {
-    "name": "VRMExpressionExporter.Runtime",
-    "rootNamespace": "VRMExpressionExporter",
+    "name": "Murasaqi.VRMExpressionExporter.Runtime",
+    "rootNamespace": "Murasaqi.VRMExpressionExporter",
     "references": [
         "UniGLTF",
         "VRM10",
