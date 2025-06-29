@@ -18,8 +18,7 @@ namespace VRMExpressionExporter.Editor
         private string animationOutputPath = "Assets/VRMExpressionAnimations";
         private bool generateAnimationClips = false;
         private bool includeZeroValues = true;
-        private bool excludeMouthBlendShapes = true; // デフォルトで口を除外
-        private bool generateWithMouthVersion = true; // 口を含むバージョンも生成
+        private bool excludeMouthBlendShapes = false; // 口のブレンドシェイプを除外するか
         private List<string> logMessages = new List<string>();
         private Vector2 mainScrollPosition;
         private Vector2 vrmListScrollPosition;
@@ -108,13 +107,6 @@ namespace VRMExpressionExporter.Editor
                 if (excludeMouthBlendShapes)
                 {
                     EditorGUILayout.HelpBox("口の動き（リップシンク）に関するブレンドシェイプを除外します。", MessageType.Info);
-                    EditorGUI.indentLevel++;
-                    generateWithMouthVersion = EditorGUILayout.Toggle("口を含むバージョンも生成", generateWithMouthVersion);
-                    if (generateWithMouthVersion)
-                    {
-                        EditorGUILayout.HelpBox("口を含むAnimationClipを「WithMouth」フォルダに追加生成します。", MessageType.Info);
-                    }
-                    EditorGUI.indentLevel--;
                 }
                 EditorGUI.indentLevel--;
             }
@@ -529,6 +521,14 @@ namespace VRMExpressionExporter.Editor
             public float Value; // 0-100
         }
         
+        private class MeshBlendShapeInfo
+        {
+            public string RelativePath;
+            public SkinnedMeshRenderer Renderer;
+            public List<string> BlendShapeNames = new List<string>();
+            public List<int> BlendShapeIndices = new List<int>();
+        }
+        
         private void GenerateAnimationClips(List<GameObject> vrmObjects)
         {
             if (!Directory.Exists(animationOutputPath))
@@ -544,64 +544,33 @@ namespace VRMExpressionExporter.Editor
                 if (vrm10Instance == null || vrm10Instance.Vrm == null || vrm10Instance.Vrm.Expression == null)
                     continue;
                 
-                // 全ブレンドシェイプを列挙
-                var allBlendShapes = GetAllBlendShapes(vrmObject);
-                logMessages.Add($"{vrmObject.name}: {allBlendShapes.Count} 個のメッシュでブレンドシェイプを検出");
+                // 全ブレンドシェイプ情報を取得
+                var allMeshes = GetAllBlendShapesWithInfo(vrmObject);
+                logMessages.Add($"{vrmObject.name}: {allMeshes.Count} 個のメッシュでブレンドシェイプを検出");
                 
                 // 表情データを取得
                 var expressions = ExtractExpressionsFromVRM(vrmObject);
                 if (expressions == null || expressions.Count == 0)
                     continue;
                 
-                // 各メッシュごとにAnimationClipを生成
-                foreach (var meshPath in allBlendShapes.Keys)
+                // VRMごとのフォルダを作成
+                var vrmFolderPath = Path.Combine(animationOutputPath, vrmObject.name);
+                if (!Directory.Exists(vrmFolderPath))
                 {
-                    var meshName = string.IsNullOrEmpty(meshPath) ? "Root" : meshPath.Replace("/", "_");
-                    
-                    foreach (var expression in expressions)
+                    Directory.CreateDirectory(vrmFolderPath);
+                }
+                
+                // 各表情ごとに統一AnimationClipを生成
+                foreach (var expression in expressions)
+                {
+                    var clip = CreateUnifiedAnimationClip(expression, allMeshes, vrmObject, excludeMouthBlendShapes);
+                    if (clip != null)
                     {
-                        // 口を除外したバージョンを生成（メインフォルダ）
-                        if (excludeMouthBlendShapes)
-                        {
-                            var clip = CreateAnimationClipForMesh(expression, allBlendShapes[meshPath], meshPath, vrmObject, true);
-                            if (clip != null)
-                            {
-                                var clipPath = Path.Combine(animationOutputPath, $"{vrmObject.name}_{meshName}_{expression.ExpressionName}.anim");
-                                AssetDatabase.CreateAsset(clip, clipPath);
-                                totalClips++;
-                                logMessages.Add($"AnimationClip作成: {clipPath}");
-                            }
-                            
-                            // 口を含むバージョンも生成（WithMouthフォルダ）
-                            if (generateWithMouthVersion)
-                            {
-                                var withMouthClip = CreateAnimationClipForMesh(expression, allBlendShapes[meshPath], meshPath, vrmObject, false);
-                                if (withMouthClip != null)
-                                {
-                                    var withMouthPath = Path.Combine(animationOutputPath, "WithMouth");
-                                    if (!Directory.Exists(withMouthPath))
-                                    {
-                                        Directory.CreateDirectory(withMouthPath);
-                                    }
-                                    var withMouthClipPath = Path.Combine(withMouthPath, $"{vrmObject.name}_{meshName}_{expression.ExpressionName}_WithMouth.anim");
-                                    AssetDatabase.CreateAsset(withMouthClip, withMouthClipPath);
-                                    totalClips++;
-                                    logMessages.Add($"AnimationClip作成（口含む）: {withMouthClipPath}");
-                                }
-                            }
-                        }
-                        else
-                        {
-                            // 口を除外しない場合は通常通り生成
-                            var clip = CreateAnimationClipForMesh(expression, allBlendShapes[meshPath], meshPath, vrmObject, false);
-                            if (clip != null)
-                            {
-                                var clipPath = Path.Combine(animationOutputPath, $"{vrmObject.name}_{meshName}_{expression.ExpressionName}.anim");
-                                AssetDatabase.CreateAsset(clip, clipPath);
-                                totalClips++;
-                                logMessages.Add($"AnimationClip作成: {clipPath}");
-                            }
-                        }
+                        var clipPath = Path.Combine(vrmFolderPath, $"{expression.ExpressionName}.anim");
+                        AssetDatabase.CreateAsset(clip, clipPath);
+                        totalClips++;
+                        string mouthInfo = excludeMouthBlendShapes ? "（口除外）" : "（口含む）";
+                        logMessages.Add($"AnimationClip作成{mouthInfo}: {clipPath}");
                     }
                 }
             }
@@ -609,30 +578,34 @@ namespace VRMExpressionExporter.Editor
             logMessages.Add($"合計 {totalClips} 個のAnimationClipを生成しました。");
         }
         
-        private Dictionary<string, List<string>> GetAllBlendShapes(GameObject vrmObject)
+        private List<MeshBlendShapeInfo> GetAllBlendShapesWithInfo(GameObject vrmObject)
         {
-            var blendShapeDict = new Dictionary<string, List<string>>();
+            var meshInfoList = new List<MeshBlendShapeInfo>();
             
             var renderers = vrmObject.GetComponentsInChildren<SkinnedMeshRenderer>();
             foreach (var renderer in renderers)
             {
                 if (renderer.sharedMesh == null) continue;
                 
-                var relativePath = GetRelativePath(vrmObject.transform, renderer.transform);
-                var blendShapeNames = new List<string>();
+                var meshInfo = new MeshBlendShapeInfo
+                {
+                    RelativePath = GetRelativePath(vrmObject.transform, renderer.transform),
+                    Renderer = renderer
+                };
                 
                 for (int i = 0; i < renderer.sharedMesh.blendShapeCount; i++)
                 {
-                    blendShapeNames.Add(renderer.sharedMesh.GetBlendShapeName(i));
+                    meshInfo.BlendShapeNames.Add(renderer.sharedMesh.GetBlendShapeName(i));
+                    meshInfo.BlendShapeIndices.Add(i);
                 }
                 
-                if (blendShapeNames.Count > 0)
+                if (meshInfo.BlendShapeNames.Count > 0)
                 {
-                    blendShapeDict[relativePath] = blendShapeNames;
+                    meshInfoList.Add(meshInfo);
                 }
             }
             
-            return blendShapeDict;
+            return meshInfoList;
         }
         
         private AnimationClip CreateAnimationClipForMesh(ExpressionData expression, List<string> meshBlendShapes, string meshPath, GameObject vrmObject, bool excludeMouth)
@@ -696,6 +669,59 @@ namespace VRMExpressionExporter.Editor
             }
             
             return path;
+        }
+        
+        private AnimationClip CreateUnifiedAnimationClip(ExpressionData expression, List<MeshBlendShapeInfo> allMeshes, GameObject vrmObject, bool excludeMouth)
+        {
+            var clip = new AnimationClip();
+            clip.name = expression.ExpressionName;
+            
+            // 表情で設定されているブレンドシェイプを収集
+            var expressionBlendShapes = new Dictionary<string, Dictionary<string, float>>();
+            foreach (var bs in expression.BlendShapeSettings)
+            {
+                if (!expressionBlendShapes.ContainsKey(bs.Path))
+                {
+                    expressionBlendShapes[bs.Path] = new Dictionary<string, float>();
+                }
+                expressionBlendShapes[bs.Path][bs.Name] = bs.Value;
+            }
+            
+            // 全メッシュの全ブレンドシェイプに対してキーフレームを設定
+            foreach (var meshInfo in allMeshes)
+            {
+                for (int i = 0; i < meshInfo.BlendShapeNames.Count; i++)
+                {
+                    var blendShapeName = meshInfo.BlendShapeNames[i];
+                    
+                    // 口のブレンドシェイプを除外する場合
+                    if (excludeMouth && IsMouthBlendShape(blendShapeName))
+                    {
+                        continue;
+                    }
+                    
+                    float value = 0f;
+                    
+                    // 表情で設定されている値があれば使用
+                    if (expressionBlendShapes.ContainsKey(meshInfo.RelativePath) &&
+                        expressionBlendShapes[meshInfo.RelativePath].ContainsKey(blendShapeName))
+                    {
+                        value = expressionBlendShapes[meshInfo.RelativePath][blendShapeName];
+                    }
+                    
+                    // 値が0でも含める設定の場合、または値が0でない場合にキーフレームを追加
+                    if (includeZeroValues || value != 0f)
+                    {
+                        var curve = AnimationCurve.Constant(0f, 0f, value);
+                        var propertyName = $"blendShape.{blendShapeName}";
+                        
+                        // VRMルートからの相対パスを使用
+                        clip.SetCurve(meshInfo.RelativePath, typeof(SkinnedMeshRenderer), propertyName, curve);
+                    }
+                }
+            }
+            
+            return clip;
         }
         
         private bool IsMouthBlendShape(string blendShapeName)

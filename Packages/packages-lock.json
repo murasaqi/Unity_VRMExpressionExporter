@@ -7,6 +7,15 @@
       "dependencies": {},
       "hash": "f213ff497e4ff462a77319cf677cf20cc0860ca9"
     },
+    "com.murasaqi.vrmexpressionexporter": {
+      "version": "file:../com.murasaqi.vrmexpressionexporter",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {
+        "com.vrmc.vrm": "0.129.2",
+        "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask"
+      }
+    },
     "com.unity.2d.animation": {
       "version": "9.2.0",
       "depth": 1,
